@@ -141,6 +141,24 @@ void Move_Missile(void)
 		hit++;
 }
 
+/* This function implements the motion of missile on the LCD screen for the opponent*/
+void Move_Missile_1(void)
+{
+	missile_ypos1=present_ypos1+8;
+	missile_xpos1=present_xpos1-32;
+	
+	for (missile_xpos1;missile_xpos1>=5;missile_xpos1--)
+	{
+		LCD_Fill(missile_xpos1, missile_ypos1, missile_xpos1+8, missile_ypos1+8, BLUE);
+		delay_ms(2);
+		LCD_Fill(missile_xpos1, missile_ypos1, missile_xpos1+8, missile_ypos1+8, BLACK);
+		delay_ms(2);
+	}
+	if (missile_ypos1-present_ypos<30)
+		hit1++;
+}
+
+
 int main(void)
 {
 }
