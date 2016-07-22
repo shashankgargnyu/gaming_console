@@ -196,6 +196,45 @@ void modify_lcd( float a[3])
 		}
 }
 
+/* This function implements the motion of opponents's tank on the the LCD based on GPIO input from the opponent
+ */
+void modify_lcd_1(uint16_t d)
+{
+	uint left= d & (0x01);
+	uint right=d & (0x02);
+
+	if(right==0)
+		{
+			if(present_ypos1<=min_ypos1)
+			{
+				present_ypos1=min_ypos1;
+				LCD_Rect(209, present_ypos1, 239,present_ypos1+30, BLUE);
+	
+			}
+			else
+			{
+				LCD_Rect(209, present_ypos1, 239, present_ypos1+30, BLACK);
+				present_ypos1=present_ypos1-5;
+				LCD_Rect(209, present_ypos1, 239, present_ypos1+30, BLUE);
+			}
+		}
+		
+		if(right==2)
+		{
+			if (present_ypos1>=max_ypos1)
+			{
+				present_ypos1=max_ypos1;
+				LCD_Rect(209, present_ypos1, 239, present_ypos1+30, BLUE);
+			}
+			else
+			{
+				LCD_Rect(209, present_ypos1, 239, present_ypos1+30, BLACK);
+				present_ypos1=present_ypos1+5;
+				LCD_Rect(209, present_ypos1, 239, present_ypos1+30, BLUE);
+			}
+		}
+}
+
 
 int main(void)
 {
