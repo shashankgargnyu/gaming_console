@@ -122,6 +122,24 @@ void init_pins()
         GPIOC->MODER |= (0 << (2*i)); // Reset the pins to enaable input mode
     }
 }	
+void Move_Missile(void)
+{
+	missile_ypos=present_ypos+8; // middle of the tank
+	missile_xpos=present_xpos+32; // top of the tank
+	
+    // travel till the boundary of the LCD
+	for (missile_xpos;missile_xpos<=226;missile_xpos++)
+	{
+		LCD_Fill(missile_xpos, missile_ypos, missile_xpos+8, missile_ypos+8, BLUE);
+		delay_ms(2);
+        // Simultaneously erase the missile from the previous position
+		LCD_Fill(missile_xpos, missile_ypos, missile_xpos+8, missile_ypos+8, BLACK);
+		delay_ms(2);
+	}
+	// increment the number of hits if opponent's missile hits the player
+	if (missile_ypos-present_ypos1<30)
+		hit++;
+}
 
 int main(void)
 {
