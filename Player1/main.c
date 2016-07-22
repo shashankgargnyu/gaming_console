@@ -236,6 +236,78 @@ void modify_lcd_1(uint16_t d)
 }
 
 
+void initialise_monitor_handles();
+
 int main(void)
 {
+  // initialize
+  SystemInit();
+  initialise_monitor_handles();
+  init_systick();
+  init_button(); // initialize button
+  LCD_Init(); // initialize LCD
+  init_accelerometers(); // initialize accelerometers
+  init_pins(); // initialize GPIO pins for input
+  
+  uint32_t t_prev = 0;
+  float a[3];
+    
+  LCD_Clear(BLACK); // clear LCD for intial startup
+  LCD_Rect(0, 40, 30, 70, RED); // Draw player's tank
+  LCD_Rect(209,40,239,70,BLUE); // Draw opponent's tank
+  
+  while (1)
+  {
+	
+    if ( (msTicks - t_prev) >= 12) // 12 milli second has elapsed
+    {
+        d= GPIOC->IDR; // store the contents of IDR register
+        t_prev = msTicks;
+        read_accelerometers(a); // read from accelerometer
+        modify_lcd(a); // send accelero readings to move player's tank
+        modify_lcd_1(d); // send opponents data to move opponent's tank
+    }
+	
+	if(ButtenIsPressed==1)
+	{
+		Move_Missile(); // fire missile if button is pressed
+		ButtenIsPressed=0;
+        ButtenPressed=1;
+	}
+	
+	if (ButtenIsReleased==1)
+	{
+		ButtenIsReleased=0;
+        ButtenReleased=1;
+	}
+
+	if (d==61351)
+	{
+		Move_Missile_1(); // fire missile for opponent if the data from opponent says that button was pressed
+	}
+	
+    /* if number of hits to the player are three
+     Game Over
+     Opponent Wins
+     */
+	if (hit==3)
+	{
+		hit=0;
+		LCD_Clear(RED);
+		delay_ms(500);
+		LCD_Clear(BLACK);
+	}
+      /* if number of hits to the opponent are three
+       Game Over
+       Player Wins
+       */
+	if (hit1==3)
+	{
+		hit1=0;
+		LCD_Clear(BLUE);
+		delay_ms(500);
+		LCD_Clear(BLACK);
+	} 
+	
+  }
 }
