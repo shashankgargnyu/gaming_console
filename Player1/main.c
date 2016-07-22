@@ -158,6 +158,44 @@ void Move_Missile_1(void)
 		hit1++;
 }
 
+/* This function implements the motion of player's tank on the the LCD based on input from the accelerometer
+ */
+void modify_lcd( float a[3])
+{
+	// move left
+    if(a[1]<-0.2)
+		{
+            // check if the player has reached the boundary
+			if(present_ypos<=min_ypos)
+			{
+				present_ypos=min_ypos;
+				LCD_Rect(0, present_ypos, 30,present_ypos+30, RED);
+			}
+			else
+			{
+				LCD_Rect(0, present_ypos, 30, present_ypos+30, BLACK);
+				present_ypos=present_ypos-5;
+				LCD_Rect(0, present_ypos, 30, present_ypos+30, RED);
+			}
+		}
+    
+		// move right
+		if(a[1]>0.2)
+		{
+			if (present_ypos>=max_ypos)
+			{
+				present_ypos=max_ypos;
+				LCD_Rect(0, present_ypos, 30, present_ypos+30, RED);
+			}
+			else
+			{
+				LCD_Rect(0, present_ypos, 30, present_ypos+30, BLACK);
+				present_ypos=present_ypos+5;
+				LCD_Rect(0, present_ypos, 30, present_ypos+30, RED);
+			}
+		}
+}
+
 
 int main(void)
 {
