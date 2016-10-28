@@ -158,7 +158,156 @@ void Move_Missile_1(void)
 		hit1++;
 }
 
+/* This function implements the motion of player's tank on the the LCD based on input from the accelerometer
+ */
+void modify_lcd( float a[3])
+{
+	// move left
+    if(a[1]<-0.2)
+		{
+            // check if the player has reached the boundary
+			if(present_ypos<=min_ypos)
+			{
+				present_ypos=min_ypos;
+				LCD_Rect(0, present_ypos, 30,present_ypos+30, RED);
+			}
+			else
+			{
+				LCD_Rect(0, present_ypos, 30, present_ypos+30, BLACK);
+				present_ypos=present_ypos-5;
+				LCD_Rect(0, present_ypos, 30, present_ypos+30, RED);
+			}
+		}
+    
+		// move right
+		if(a[1]>0.2)
+		{
+			if (present_ypos>=max_ypos)
+			{
+				present_ypos=max_ypos;
+				LCD_Rect(0, present_ypos, 30, present_ypos+30, RED);
+			}
+			else
+			{
+				LCD_Rect(0, present_ypos, 30, present_ypos+30, BLACK);
+				present_ypos=present_ypos+5;
+				LCD_Rect(0, present_ypos, 30, present_ypos+30, RED);
+			}
+		}
+}
+
+/* This function implements the motion of opponents's tank on the the LCD based on GPIO input from the opponent
+ */
+void modify_lcd_1(uint16_t d)
+{
+	uint left= d & (0x01);
+	uint right=d & (0x02);
+
+	if(right==0)
+		{
+			if(present_ypos1<=min_ypos1)
+			{
+				present_ypos1=min_ypos1;
+				LCD_Rect(209, present_ypos1, 239,present_ypos1+30, BLUE);
+	
+			}
+			else
+			{
+				LCD_Rect(209, present_ypos1, 239, present_ypos1+30, BLACK);
+				present_ypos1=present_ypos1-5;
+				LCD_Rect(209, present_ypos1, 239, present_ypos1+30, BLUE);
+			}
+		}
+		
+		if(right==2)
+		{
+			if (present_ypos1>=max_ypos1)
+			{
+				present_ypos1=max_ypos1;
+				LCD_Rect(209, present_ypos1, 239, present_ypos1+30, BLUE);
+			}
+			else
+			{
+				LCD_Rect(209, present_ypos1, 239, present_ypos1+30, BLACK);
+				present_ypos1=present_ypos1+5;
+				LCD_Rect(209, present_ypos1, 239, present_ypos1+30, BLUE);
+			}
+		}
+}
+
+
+void initialise_monitor_handles();
 
 int main(void)
 {
+  // initialize
+  SystemInit();
+  initialise_monitor_handles();
+  init_systick();
+  init_button(); // initialize button
+  LCD_Init(); // initialize LCD
+  init_accelerometers(); // initialize accelerometers
+  init_pins(); // initialize GPIO pins for input
+  
+  uint32_t t_prev = 0;
+  float a[3];
+    
+  LCD_Clear(BLACK); // clear LCD for intial startup
+  LCD_Rect(0, 40, 30, 70, RED); // Draw player's tank
+  LCD_Rect(209,40,239,70,BLUE); // Draw opponent's tank
+  
+  while (1)
+  {
+	
+    if ( (msTicks - t_prev) >= 12) // 12 milli second has elapsed
+    {
+        d= GPIOC->IDR; // store the contents of IDR register
+        t_prev = msTicks;
+        read_accelerometers(a); // read from accelerometer
+        modify_lcd(a); // send accelero readings to move player's tank
+        modify_lcd_1(d); // send opponents data to move opponent's tank
+    }
+	
+	if(ButtenIsPressed==1)
+	{
+		Move_Missile(); // fire missile if button is pressed
+		ButtenIsPressed=0;
+        ButtenPressed=1;
+	}
+	
+	if (ButtenIsReleased==1)
+	{
+		ButtenIsReleased=0;
+        ButtenReleased=1;
+	}
+
+	if (d==61351)
+	{
+		Move_Missile_1(); // fire missile for opponent if the data from opponent says that button was pressed
+	}
+	
+    /* if number of hits to the player are three
+     Game Over
+     Opponent Wins
+     */
+	if (hit==3)
+	{
+		hit=0;
+		LCD_Clear(RED);
+		delay_ms(500);
+		LCD_Clear(BLACK);
+	}
+      /* if number of hits to the opponent are three
+       Game Over
+       Player Wins
+       */
+	if (hit1==3)
+	{
+		hit1=0;
+		LCD_Clear(BLUE);
+		delay_ms(500);
+		LCD_Clear(BLACK);
+	} 
+	
+  }
 }
